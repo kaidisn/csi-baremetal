@@ -16,7 +16,7 @@ BUILD_REL_B      := $(shell git rev-parse --short HEAD)
 BLD_CNT          := $(shell echo ${BUILD_REL_A})
 BLD_SHA          := $(shell echo ${BUILD_REL_B})
 RELEASE_STR      := ${BLD_CNT}.${BLD_SHA}
-FULL_VERSION     := ${PRODUCT_VERSION}-${RELEASE_STR}
+FULL_VERSION     := ${PRODUCT_VERSION}
 TAG              := ${PRODUCT_VERSION}
 
 ### third-party components version
