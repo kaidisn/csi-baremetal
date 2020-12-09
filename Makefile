@@ -9,7 +9,7 @@ include Makefile.validation
 
 # print version
 version:
-	@printf $(PRODUCT_VERSION)
+	@printf $(TAG)
 
 dependency:
 	${GO_ENV_VARS} go mod download
