@@ -17,7 +17,7 @@ BLD_CNT          := $(shell echo ${BUILD_REL_A})
 BLD_SHA          := $(shell echo ${BUILD_REL_B})
 RELEASE_STR      := ${BLD_CNT}.${BLD_SHA}
 FULL_VERSION     := ${PRODUCT_VERSION}-${RELEASE_STR}
-TAG              := ${FULL_VERSION}
+TAG              := ${PRODUCT_VERSION}
 
 ### third-party components version
 CSI_PROVISIONER_TAG := v1.2.2
