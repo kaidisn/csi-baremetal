@@ -30,6 +30,7 @@ import (
 	storageV1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 	k8sCl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	genV1 "github.com/dell/csi-baremetal/api/generated/v1"
@@ -59,7 +60,7 @@ type Extender struct {
 
 // NewExtender returns new instance of Extender struct
 func NewExtender(logger *logrus.Logger, namespace, provisioner string, featureConf fc.FeatureChecker) (*Extender, error) {
-	k8sClient, err := k8s.GetK8SClient()
+	k8sClient, err := k8s.GetK8SCachedClient(ctrl.SetupSignalHandler(), logger)
 	if err != nil {
 		return nil, err
 	}
