@@ -33,6 +33,8 @@ spec:
           type: object
         spec:
           properties:
+            Health:
+              type: string
             Locations:
               items:
                 type: string
