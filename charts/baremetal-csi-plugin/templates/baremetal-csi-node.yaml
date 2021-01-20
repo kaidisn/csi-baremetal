@@ -70,7 +70,6 @@ spec:
           - --loglevel={{ .Values.log.level }}
           - --metrics-address=:{{ .Values.node.metrics.port }}
           - --metrics-path={{ .Values.node.metrics.path }}
-          - --randomstartdelay={{ .Values.feature.randomstartdelay }}
           {{- if .Values.logReceiver.create  }}
           - --logpath=/var/log/csi.log
           {{- end }}
