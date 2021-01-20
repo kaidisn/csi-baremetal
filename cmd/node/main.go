@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"net/http"
 	"strconv"
@@ -53,7 +54,8 @@ import (
 )
 
 const (
-	componentName = "baremetal-csi-node"
+	componentName        = "baremetal-csi-node"
+	maxStartDelaySeconds = 90
 )
 
 var (
@@ -72,7 +74,9 @@ var (
 		fmt.Sprintf("Log level, support values are %s, %s, %s", base.InfoLevel, base.DebugLevel, base.TraceLevel))
 	metricsAddress = flag.String("metrics-address", "", "The TCP network address where the prometheus metrics endpoint will run"+
 		"(example: :8080 which corresponds to port 8080 on local host). The default is empty string, which means metrics endpoint is disabled.")
-	metricspath = flag.String("metrics-path", "/metrics", "The HTTP path where prometheus metrics will be exposed. Default is /metrics.")
+	metricspath      = flag.String("metrics-path", "/metrics", "The HTTP path where prometheus metrics will be exposed. Default is /metrics.")
+	randomstartdelay = flag.Bool("randomstartdelay", false, "Enable random start delay."+
+		" Can help reduce load to kube-api when starting in large cluster")
 )
 
 func main() {
@@ -81,6 +85,7 @@ func main() {
 	featureConf := featureconfig.NewFeatureConfig()
 	featureConf.Update(featureconfig.FeatureACReservation, *useACRs)
 	featureConf.Update(featureconfig.FeatureNodeIDFromAnnotation, *useNodeAnnotation)
+	featureConf.Update(featureconfig.FeatureNodeRandomStartDelay, *randomstartdelay)
 
 	var enableMetrics bool
 	if *metricspath != "" {
@@ -92,6 +97,12 @@ func main() {
 		logger.Warnf("Can't set logger's output to %s. Using stdout instead.\n", *logPath)
 	}
 
+	if featureConf.IsEnabled(featureconfig.FeatureNodeRandomStartDelay) {
+		rand.Seed(time.Now().UnixNano())
+		delay := rand.Intn(maxStartDelaySeconds)
+		logger.Infof("Startup delay enabled. Wait %d seconds.", delay)
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
 	logger.Info("Starting Node Service")
 
 	// gRPC client for communication with DriveMgr via TCP socket

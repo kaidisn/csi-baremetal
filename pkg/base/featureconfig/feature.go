@@ -25,6 +25,8 @@ const (
 	FeatureNodeIDFromAnnotation = "NodeIDFromAnnotation"
 	// FeatureExtenderWaitForResources if enabled extender will do few retries if no capacity found
 	FeatureExtenderWaitForResources = "ExtenderWaitForResources"
+	// FeatureNodeRandomStartDelay if enabled node will wait random time before start interacting with kube-api
+	FeatureNodeRandomStartDelay = "NodeRandomStartDelay"
 )
 
 // FeatureChecker is a "read" interface for FeatureConfig

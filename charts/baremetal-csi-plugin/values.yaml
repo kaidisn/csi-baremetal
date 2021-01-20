@@ -9,6 +9,7 @@ env:
 feature:
   extender: false
   usenodeannotation: false
+  randomstartdelay: false
 
 # to deploy on specific nodes kubeclt get nodes -l <key>=<value>
 nodeSelector:
