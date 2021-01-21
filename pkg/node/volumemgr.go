@@ -213,10 +213,11 @@ func (m *VolumeManager) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if !util.ContainsString(volume.ObjectMeta.Finalizers, volumeFinalizer) && volume.Spec.CSIStatus != apiV1.Empty {
 			ll.Debug("Appending finalizer for volume")
 			volume.ObjectMeta.Finalizers = append(volume.ObjectMeta.Finalizers, volumeFinalizer)
-			if err := m.k8sClient.UpdateCR(ctx, volume); err != nil {
+			err := m.k8sClient.UpdateCR(ctx, volume)
+			if err != nil {
 				ll.Errorf("Unable to append finalizer %s to Volume, error: %v.", volumeFinalizer, err)
-				return ctrl.Result{Requeue: true}, err
 			}
+			return ctrl.Result{Requeue: err != nil}, err
 		}
 	} else {
 		switch volume.Spec.CSIStatus {
