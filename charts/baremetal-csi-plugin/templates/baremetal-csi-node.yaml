@@ -25,15 +25,6 @@ spec:
       hostIPC: True
       serviceAccountName: csi-node-sa
       terminationGracePeriodSeconds: 10
-      initContainers:
-        {{- if .Values.feature.randomstartdelay }}
-        - name: init-myservice
-          image: {{- if .Values.env.test }} baremetal-csi-plugin-node:{{ default .Values.image.tag .Values.node.image.tag }}
-            {{- else }} {{ .Values.global.registry }}/baremetal-csi-plugin-node:{{ default .Values.image.tag .Values.node.image.tag }}
-            {{- end }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ 'bash', '-c', 'sleep $(( ( RANDOM % 120 )  + 1 ))']
-        {{- end }}
       containers:
       # ********************** DRIVER-REGISTRAR sidecar container definition **********************
       - name: csi-node-driver-registrar
