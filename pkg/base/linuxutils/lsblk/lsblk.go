@@ -57,7 +57,7 @@ func NewLSBLK(log *logrus.Logger) *LSBLK {
 	return &LSBLK{e: e}
 }
 
-// BlockDevice is the struct that represents output of lsblk command for a device
+// BlockDevice is the struct that represents output of lsblk (from util-linux 2.31.1) command for a device
 type BlockDevice struct {
 	Name       string        `json:"name,omitempty"`
 	Type       string        `json:"type,omitempty"`
@@ -74,21 +74,51 @@ type BlockDevice struct {
 	Children   []BlockDevice `json:"children,omitempty"`
 }
 
-// BlockDevice is the struct that represents output of lsblk command for a device
+// BlockDeviceV2 is the struct that represents output of lsblk (from util-linux 2.34) command for a device
 type BlockDeviceV2 struct {
-	Name       string        `json:"name,omitempty"`
-	Type       string        `json:"type,omitempty"`
-	Size       int64         `json:"size,omitempty"`
-	Rota       bool          `json:"rota,omitempty"`
-	Serial     string        `json:"serial,omitempty"`
-	WWN        string        `json:"wwn,omitempty"`
-	Vendor     string        `json:"vendor,omitempty"`
-	Model      string        `json:"model,omitempty"`
-	Rev        string        `json:"rev,omitempty"`
-	MountPoint string        `json:"mountpoint,omitempty"`
-	FSType     string        `json:"fstype,omitempty"`
-	PartUUID   string        `json:"partuuid,omitempty"`
-	Children   []BlockDevice `json:"children,omitempty"`
+	Name       string          `json:"name,omitempty"`
+	Type       string          `json:"type,omitempty"`
+	Size       int64           `json:"size,omitempty"`
+	Rota       bool            `json:"rota,omitempty"`
+	Serial     string          `json:"serial,omitempty"`
+	WWN        string          `json:"wwn,omitempty"`
+	Vendor     string          `json:"vendor,omitempty"`
+	Model      string          `json:"model,omitempty"`
+	Rev        string          `json:"rev,omitempty"`
+	MountPoint string          `json:"mountpoint,omitempty"`
+	FSType     string          `json:"fstype,omitempty"`
+	PartUUID   string          `json:"partuuid,omitempty"`
+	Children   []BlockDeviceV2 `json:"children,omitempty"`
+}
+
+func convertToV1(blockV2 BlockDeviceV2) BlockDevice  {
+	var blockV1 = BlockDevice{}
+	if blockV2.Children != nil {
+		blockV1.Children = make([]BlockDevice, 0)
+		for _, child := range blockV2.Children {
+			blockV1.Children = append(blockV1.Children, convertToV1(child))
+		}
+	}
+
+	blockV1.Name = blockV2.Name
+	blockV1.Type = blockV2.Type
+	blockV1.Size = fmt.Sprint(blockV2.Size)
+	// convert from boolean to string
+	rota := "0"
+	if blockV2.Rota {
+		rota = "1"
+	}
+	blockV1.Rota = rota
+	blockV1.Serial = blockV2.Serial
+	blockV1.WWN = blockV2.WWN
+	blockV1.Vendor = blockV2.Vendor
+	blockV1.Model = blockV2.Model
+	blockV1.Rev = blockV2.Rev
+	blockV1.MountPoint = blockV2.MountPoint
+	blockV1.FSType = blockV2.FSType
+	blockV1.PartUUID = blockV2.PartUUID
+
+	return blockV1
 }
 
 // GetBlockDevices run os lsblk command for device and construct BlockDevice struct based on output
@@ -127,13 +157,7 @@ func (l *LSBLK) GetBlockDevices(device string) ([]BlockDevice, error) {
 		}
 		for _, d := range devsV2 {
 			if d.Type != romDeviceType {
-				var rota string = "0"
-				if d.Rota {
-					rota = "1"
-				}
-				res = append(res, BlockDevice{Name:d.Name, Type:d.Type, Size:fmt.Sprint(d.Size), Rota:rota, Serial:d.Serial,
-					WWN:d.WWN, Vendor:d.Vendor, Model:d.Model, Rev:d.Rev, MountPoint:d.MountPoint, FSType:d.FSType,
-					PartUUID:d.PartUUID, Children:d.Children})
+				res = append(res, convertToV1(d))
 			}
 		}
 	} else {
