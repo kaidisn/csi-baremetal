@@ -120,10 +120,14 @@ var LsblkTwoDevicesStr = `{
 			  "blockdevices":[{
 				"name": "/dev/sda",
 				"type": "disk",
+				"size": "8001563222016",
+				"rota": "1",
 				"serial": "hdd1"
 				}, {
 				"name": "/dev/sdb",
 				"type": "disk",
+				"size": "4001563222016",
+				"rota": "0",
 				"serial": "hdd2"
 				}]
 			}`
@@ -152,3 +156,19 @@ var LsblkDevWithChildren = CmdOut{
 			}`,
 	Stderr: "",
 	Err:    nil}
+
+var LsblkDevNewVersion = `{
+			"blockdevices": [{
+				"name":"/dev/sdc",
+				"type":"disk",
+				"size":8001563222016,
+				"rota":true,
+				"serial":"5000cca0bbce17ff",
+				"wwn":"0x5000cca0bbce17ff",
+				"vendor":"ATA     ",
+				"model":"HGST_HUS728T8TAL",
+				"rev":"RT04",
+				"mountpoint":null,
+				"fstype":null,
+				"partuuid":null
+			}]}`

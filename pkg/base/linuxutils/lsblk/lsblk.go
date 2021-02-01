@@ -74,6 +74,23 @@ type BlockDevice struct {
 	Children   []BlockDevice `json:"children,omitempty"`
 }
 
+// BlockDevice is the struct that represents output of lsblk command for a device
+type BlockDeviceV2 struct {
+	Name       string        `json:"name,omitempty"`
+	Type       string        `json:"type,omitempty"`
+	Size       int64         `json:"size,omitempty"`
+	Rota       bool          `json:"rota,omitempty"`
+	Serial     string        `json:"serial,omitempty"`
+	WWN        string        `json:"wwn,omitempty"`
+	Vendor     string        `json:"vendor,omitempty"`
+	Model      string        `json:"model,omitempty"`
+	Rev        string        `json:"rev,omitempty"`
+	MountPoint string        `json:"mountpoint,omitempty"`
+	FSType     string        `json:"fstype,omitempty"`
+	PartUUID   string        `json:"partuuid,omitempty"`
+	Children   []BlockDevice `json:"children,omitempty"`
+}
+
 // GetBlockDevices run os lsblk command for device and construct BlockDevice struct based on output
 // Receives device path. If device is empty string, info about all devices will be collected
 // Returns slice of BlockDevice structs or error if something went wrong
@@ -83,24 +100,53 @@ func (l *LSBLK) GetBlockDevices(device string) ([]BlockDevice, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	isV2 := false
+	var rawOut2 map[string][]BlockDeviceV2
 	rawOut := make(map[string][]BlockDevice, 1)
 	err = json.Unmarshal([]byte(strOut), &rawOut)
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal output to BlockDevice instance, error: %v", err)
+		// try version 2
+		rawOut2 = make(map[string][]BlockDeviceV2, 1)
+		err = json.Unmarshal([]byte(strOut), &rawOut2)
+		if err != nil {
+			return nil, fmt.Errorf("unable to unmarshal output to BlockDevice instance, error: %v", err)
+		}
+		isV2 = true
 	}
 	res := make([]BlockDevice, 0)
 	var (
 		devs []BlockDevice
 		ok   bool
 	)
-	if devs, ok = rawOut[outputKey]; !ok {
-		return nil, fmt.Errorf("unexpected lsblk output format, missing \"%s\" key", outputKey)
-	}
-	for _, d := range devs {
-		if d.Type != romDeviceType {
-			res = append(res, d)
+
+	if isV2 {
+		var devsV2 []BlockDeviceV2
+		if devsV2, ok = rawOut2[outputKey]; !ok {
+			return nil, fmt.Errorf("unexpected lsblk output format, missing \"%s\" key", outputKey)
+		}
+		for _, d := range devsV2 {
+			if d.Type != romDeviceType {
+				var rota string = "0"
+				if d.Rota {
+					rota = "1"
+				}
+				res = append(res, BlockDevice{Name:d.Name, Type:d.Type, Size:fmt.Sprint(d.Size), Rota:rota, Serial:d.Serial,
+					WWN:d.WWN, Vendor:d.Vendor, Model:d.Model, Rev:d.Rev, MountPoint:d.MountPoint, FSType:d.FSType,
+					PartUUID:d.PartUUID, Children:d.Children})
+			}
+		}
+	} else {
+		if devs, ok = rawOut[outputKey]; !ok {
+			return nil, fmt.Errorf("unexpected lsblk output format, missing \"%s\" key", outputKey)
+		}
+		for _, d := range devs {
+			if d.Type != romDeviceType {
+				res = append(res, d)
+			}
 		}
 	}
+
 	return res, nil
 }
 
