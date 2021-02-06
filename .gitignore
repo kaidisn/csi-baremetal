@@ -18,3 +18,7 @@ coverage.html
 .vscode
 # python 
 __pycache__
+halmgr
+kahm/*
+variables.override.mk
+Makefile.addition
