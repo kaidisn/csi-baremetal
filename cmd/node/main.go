@@ -105,10 +105,12 @@ func main() {
 
 	// try to change root
 	if err := syscall.Chroot(base.HostRootPath); err != nil {
+		logger.Errorf("Failed to change root to: %s, error: %s", base.HostRootPath, err)
 		panic(err)
 	}
 	// try to change dir
 	if err := os.Chdir("/"); err != nil {
+		logger.Errorf("Failed to change dir, error: %s", err)
 		panic(err)
 	}
 
