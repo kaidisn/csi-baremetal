@@ -24,7 +24,9 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
@@ -100,6 +102,15 @@ func main() {
 	}
 
 	logger.Info("Starting Node Service")
+
+	// try to change root
+	if err := syscall.Chroot(base.HostRootPath); err != nil {
+		panic(err)
+	}
+	// try to change dir
+	if err := os.Chdir("/"); err != nil {
+		panic(err)
+	}
 
 	// gRPC client for communication with DriveMgr via TCP socket
 	gRPCClient, err := rpc.NewClient(nil, *driveMgrEndpoint, enableMetrics, logger)
