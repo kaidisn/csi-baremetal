@@ -19,6 +19,7 @@ package command
 import (
 	"bytes"
 	"fmt"
+	"github.com/dell/csi-baremetal/pkg/base"
 	"os/exec"
 	"strings"
 	"time"
@@ -115,6 +116,9 @@ func (e *Executor) runCmdFromCmdObj(cmd *exec.Cmd) (outStr string, errStr string
 	}
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+
+	// set host root
+	cmd.SysProcAttr.Chroot = base.HostRootPath
 
 	cmdStartTime := time.Now()
 	err = cmd.Run()
