@@ -103,17 +103,6 @@ func main() {
 
 	logger.Info("Starting Node Service")
 
-	// try to change root
-	if err := syscall.Chroot(base.HostRootPath); err != nil {
-		logger.Errorf("Failed to change root to: %s, error: %s", base.HostRootPath, err)
-		panic(err)
-	}
-	// try to change dir
-	if err := os.Chdir("/"); err != nil {
-		logger.Errorf("Failed to change dir, error: %s", err)
-		panic(err)
-	}
-
 	// gRPC client for communication with DriveMgr via TCP socket
 	gRPCClient, err := rpc.NewClient(nil, *driveMgrEndpoint, enableMetrics, logger)
 	if err != nil {
@@ -173,6 +162,18 @@ func main() {
 			}
 		}()
 	}
+
+	// try to change root
+	if err := syscall.Chroot(base.HostRootPath); err != nil {
+		logger.Errorf("Failed to change root to: %s, error: %s", base.HostRootPath, err)
+		panic(err)
+	}
+	// try to change dir
+	if err := os.Chdir("/"); err != nil {
+		logger.Errorf("Failed to change dir, error: %s", err)
+		panic(err)
+	}
+	
 	go func() {
 		logger.Info("Starting Node Health server ...")
 		if err := util.SetupAndStartHealthCheckServer(
