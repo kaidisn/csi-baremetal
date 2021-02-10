@@ -32,6 +32,7 @@ type CmdExecutor interface {
 	RunCmd(cmd interface{}) (string, string, error)
 	SetLogger(logger *logrus.Logger)
 	SetLevel(level logrus.Level)
+	SetRoot(root string)
 	RunCmdWithAttempts(cmd interface{}, attempts int, timeout time.Duration) (string, string, error)
 }
 
@@ -54,8 +55,8 @@ func (e *Executor) SetLevel(level logrus.Level) {
 	e.msgLevel = level
 }
 
-func (e *Executor) SetNewRoot(newRoot string) {
-	e.chRoot = newRoot
+func (e *Executor) SetRoot(root string) {
+	e.chRoot = root
 }
 
 // RunCmdWithAttempts runs specified command on OS with given attempts and timeout between attempts

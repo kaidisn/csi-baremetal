@@ -55,7 +55,7 @@ func NewLSBLK(log *logrus.Logger) *LSBLK {
 	e := &command.Executor{}
 	e.SetLogger(log)
 	e.SetLevel(logrus.TraceLevel)
-	e.SetNewRoot(base.HostRootPath)
+	e.SetRoot(base.HostRootPath)
 
 	return &LSBLK{e: e}
 }

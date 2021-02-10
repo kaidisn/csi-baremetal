@@ -20,6 +20,7 @@ package partitionhelper
 
 import (
 	"fmt"
+	"github.com/dell/csi-baremetal/pkg/base"
 	"strings"
 	"sync"
 
@@ -84,6 +85,7 @@ type WrapPartitionImpl struct {
 
 // NewWrapPartitionImpl is a constructor for WrapPartitionImpl instance
 func NewWrapPartitionImpl(e command.CmdExecutor, log *logrus.Logger) *WrapPartitionImpl {
+	e.SetRoot(base.HostRootPath)
 	return &WrapPartitionImpl{
 		e:         e,
 		lsblkUtil: lsblk.NewLSBLK(log),
