@@ -19,9 +19,9 @@ package command
 import (
 	"bytes"
 	"fmt"
-	"github.com/dell/csi-baremetal/pkg/base"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -39,6 +39,7 @@ type CmdExecutor interface {
 type Executor struct {
 	log      *logrus.Entry
 	msgLevel logrus.Level
+	chRoot   string
 }
 
 // SetLogger sets logrus logger to Executor struct
@@ -51,6 +52,10 @@ func (e *Executor) SetLogger(logger *logrus.Logger) {
 // Receives logrus Level
 func (e *Executor) SetLevel(level logrus.Level) {
 	e.msgLevel = level
+}
+
+func (e *Executor) SetNewRoot(newRoot string) {
+	e.chRoot = newRoot
 }
 
 // RunCmdWithAttempts runs specified command on OS with given attempts and timeout between attempts
@@ -118,7 +123,12 @@ func (e *Executor) runCmdFromCmdObj(cmd *exec.Cmd) (outStr string, errStr string
 	cmd.Stderr = &stderr
 
 	// set host root
-	cmd.SysProcAttr.Chroot = base.HostRootPath
+	if e.chRoot != "" {
+		if cmd.SysProcAttr == nil {
+			cmd.SysProcAttr = &syscall.SysProcAttr{}
+		}
+		cmd.SysProcAttr.Chroot = e.chRoot
+	}
 
 	cmdStartTime := time.Now()
 	err = cmd.Run()

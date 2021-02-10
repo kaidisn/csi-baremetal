@@ -20,6 +20,7 @@ package lsblk
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dell/csi-baremetal/pkg/base"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -54,6 +55,8 @@ func NewLSBLK(log *logrus.Logger) *LSBLK {
 	e := &command.Executor{}
 	e.SetLogger(log)
 	e.SetLevel(logrus.TraceLevel)
+	e.SetNewRoot(base.HostRootPath)
+
 	return &LSBLK{e: e}
 }
 
